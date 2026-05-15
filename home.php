@@ -364,7 +364,7 @@
         }
         $check->close();
 
-        $stmt = $conn->prepare("INSERT INTO tb_Enrollment (Student_id, Lesson_id, Room_id, Status) VALUES (?, ?, ?, ?)");
+        $stmt = $conn->prepare("INSERT INTO tb_Enrollment (Student_id, Lesson_id, Room_id, Status , approve) VALUES (?, ?, ?, ? , 0)");
         if (! $stmt) {
             $err = $conn->error;
             $conn->close();
@@ -445,6 +445,23 @@
         $stmt->close();
         $conn->close();
         header("Location: home.php?class_id=$class_id&error=" . urlencode("ຂໍ້ຜິດພາດ: $err") . "&tab=enrollment");
+        exit();
+    }
+    }
+    if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['approve_enrollment']) && $is_teacher) {
+    $enroll_id = intval($_POST['enroll_id']);
+    $stmt      = $conn->prepare("UPDATE tb_Enrollment SET approve=1 WHERE Enroll_id=?");
+    $stmt->bind_param("i", $enroll_id);
+    if ($stmt->execute()) {
+        $stmt->close();
+        $conn->close();
+        header("Location: home.php?class_id=$class_id&success=enrolled&tab=enrollment");
+        exit();
+    } else {
+        $err = $stmt->error;
+        $stmt->close();
+        $conn->close();
+        header("Location: home.php?class_id=$class_id&error=" . urlencode($err) . "&tab=enrollment");
         exit();
     }
     }
@@ -597,7 +614,7 @@
     if ($is_student && $display_student_id) {
     $e_stmt = $conn->prepare("
             SELECT en.Enroll_id, en.Enroll_date, en.Status,
-                   en.Student_id, en.Lesson_id, en.Room_id,
+                   en.Student_id, en.Lesson_id, en.Room_id, en.approve,
                    l.Lesson_name, r.Room_name
             FROM tb_Enrollment en
             LEFT JOIN tb_Lesson l ON en.Lesson_id = l.Lesson_id
@@ -677,16 +694,16 @@
     $all_enrollments = [];
     if ($is_teacher) {
     $all_enroll_stmt = $conn->prepare("
-            SELECT en.Enroll_id, en.Enroll_date, en.Status,
-                   en.Student_id, en.Lesson_id, en.Room_id,
-                   l.Lesson_name,
-                   COALESCE(s.Student_full_name, 'Unknown') AS Student_full_name
-            FROM tb_Enrollment en
-            LEFT JOIN tb_Lesson l ON en.Lesson_id = l.Lesson_id
-            LEFT JOIN tb_Student s ON en.Student_id = s.Student_id
-            WHERE en.Room_id = ?
-            ORDER BY en.Enroll_date DESC
-        ");
+    SELECT en.Enroll_id, en.Enroll_date, en.Status, en.approve,
+           en.Student_id, en.Lesson_id, en.Room_id,
+           l.Lesson_name,
+           COALESCE(s.Student_full_name, 'Unknown') AS Student_full_name
+    FROM tb_Enrollment en
+    LEFT JOIN tb_Lesson l ON en.Lesson_id = l.Lesson_id
+    LEFT JOIN tb_Student s ON en.Student_id = s.Student_id
+    WHERE en.Room_id = ?
+    ORDER BY en.Enroll_date DESC
+");
     if ($all_enroll_stmt) {
         $all_enroll_stmt->bind_param("i", $class_id);
         $all_enroll_stmt->execute();
@@ -1093,9 +1110,9 @@
         <?php if ($is_teacher): ?>
             <button class="tab-btn" onclick="showTab('analysis', this)">📊 ການວິເຄາະ</button>
         <?php endif; ?>
-        <?php if ($is_student): ?>
-            <button class="tab-btn" onclick="showTab('enrollment', this)">📋 ການລົງທະບຽນ</button>
-        <?php endif; ?>
+
+        <button class="tab-btn" onclick="showTab('enrollment', this)">📋 ການລົງທະບຽນ</button>
+
         <button class="tab-btn" onclick="showTab('submit_exam', this)">📤 ສົ່ງການສອບເສັງ</button>
     </div>
 
@@ -1309,7 +1326,7 @@
     <?php endif; ?>
 
     <!-- ===== ENROLLMENT PANEL (Student Only) ===== -->
-    <?php if ($is_student): ?>
+
     <div id="enrollment" class="tab-panel">
         <?php if ($success_msg && isset($_GET['tab']) && $_GET['tab'] === 'enrollment'): ?>
             <div class="alert-success" id="successAlert">✅ <?php echo htmlspecialchars($success_msg); ?></div>
@@ -1318,34 +1335,62 @@
             <div class="alert-error" id="errorAlert">❌ <?php echo htmlspecialchars($error_msg); ?></div>
         <?php endif; ?>
         <div class="section-header">
-            <h3>📋 ການລົງທະບຽນຂອງຂ້ອຍ</h3>
+            <h3>📋 <?php echo $is_teacher ? 'ການລົງທະບຽນທັງໝົດ' : 'ການລົງທະບຽນຂອງຂ້ອຍ'; ?></h3>
+            <?php if ($is_student): ?>
             <button class="btn-create" onclick="openModal('enrollModal')">➕ ລົງທະບຽນໃນບົດຮຽນ</button>
-        </div>
-        <div class="card-grid">
-            <?php if (! empty($enrollments)): ?>
-                <?php foreach ($enrollments as $enroll): ?>
-                    <div class="item-card">
-                        <span class="icon">📋</span>
-                        <strong><?php echo htmlspecialchars($enroll['Lesson_name'] ?? 'ບໍ່ມີ'); ?></strong>
-                        <span class="type-tag">🏫 ຫ້ອງ: <?php echo htmlspecialchars($enroll['Room_id']); ?></span>
-                        <span class="type-tag">👤 ລະຫັດນັກຮຽນ: <?php echo htmlspecialchars($enroll['Student_id']); ?></span>
-                        <span class="type-tag">📖 ລະຫັດບົດຮຽນ: <?php echo htmlspecialchars($enroll['Lesson_id']); ?></span>
-                        <span class="type-tag" style="background:<?php echo $enroll['Status'] === 'Completed' ? '#e8f5e9' : '#e8f0fe'; ?>;color:<?php echo $enroll['Status'] === 'Completed' ? '#2e7d32' : '#1a73e8'; ?>;">
-                            <?php echo $enroll['Status'] === 'Completed' ? '✅' : '📖'; ?> <?php echo htmlspecialchars($enroll['Status'] ?? 'Studying'); ?>
-                        </span>
-                        <div style="font-size:11px;color:#aaa;margin-top:8px;">📅 <?php echo date('d M Y H:i', strtotime($enroll['Enroll_date'])); ?></div>
-                        <div class="card-actions">
-                            <button class="btn-edit" onclick="openEditEnroll(<?php echo $enroll['Enroll_id']; ?>,<?php echo $enroll['Lesson_id']; ?>,'<?php echo addslashes($enroll['Status']); ?>')">✏️ ແກ້ໄຂ</button>
-                            <button class="btn-delete" onclick="confirmDeleteEnroll(<?php echo $enroll['Enroll_id']; ?>)">🗑️ ລຶບ</button>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
-            <?php else: ?>
-                <p style="color:#999;grid-column:1/-1;padding:20px 0;">ບໍ່ພົບການລົງທະບຽນ.</p>
             <?php endif; ?>
         </div>
-    </div>
-    <?php endif; ?>
+        <div class="card-grid">
+            <?php
+                $display_enrollments = $is_teacher ? $all_enrollments : $enrollments;
+            if (! empty($display_enrollments)): ?>
+            <?php foreach ($display_enrollments as $enroll): ?>
+                <div class="item-card">
+                <span class="icon">📋</span>
+                <?php if ($is_teacher): ?>
+                    <strong>👤 <?php echo htmlspecialchars($enroll['Student_full_name'] ?? 'Unknown'); ?></strong>
+                <?php endif; ?>
+                <strong><?php echo htmlspecialchars($enroll['Lesson_name'] ?? 'ບໍ່ມີ'); ?></strong>
+                <span class="type-tag">🏫 ຫ້ອງ: <?php echo htmlspecialchars($enroll['Room_id']); ?></span>
+                <span class="type-tag">👤 ລະຫັດນັກຮຽນ: <?php echo htmlspecialchars($enroll['Student_id']); ?></span>
+                <span class="type-tag">📖 ລະຫັດບົດຮຽນ: <?php echo htmlspecialchars($enroll['Lesson_id']); ?></span>
+                <span class="type-tag" style="background:<?php echo $enroll['Status'] === 'Completed' ? '#e8f5e9' : '#e8f0fe'; ?>;color:<?php echo $enroll['Status'] === 'Completed' ? '#2e7d32' : '#1a73e8'; ?>;">
+                    <?php echo $enroll['Status'] === 'Completed' ? '✅' : '📖'; ?> <?php echo htmlspecialchars($enroll['Status'] ?? 'Studying'); ?>
+                </span>
+                <?php if (isset($enroll['approve'])): ?>
+                    <span class="type-tag" style="background:<?php echo $enroll['approve'] == 1 ? '#e8f5e9' : '#fff8e1'; ?>;color:<?php echo $enroll['approve'] == 1 ? '#2e7d32' : '#f57c00'; ?>;">
+                    <?php echo $enroll['approve'] == 1 ? '✅ ອະນຸມັດແລ້ວ' : '⏳ ລໍຖ້າອະນຸມັດ'; ?>
+                    </span>
+                <?php endif; ?>
+                <div style="font-size:11px;color:#aaa;margin-top:8px;">📅 <?php echo date('d M Y H:i', strtotime($enroll['Enroll_date'])); ?></div>
+                <div class="card-actions">
+                    <?php if ($is_student): ?>
+                        <?php if (isset($enroll['approve']) && $enroll['approve'] == 1): ?>
+                            <button class="btn-edit" style="background:#e8f5e9;color:#2e7d32;border:1px solid #a5d6a7;cursor:default;flex:2;" disabled>✅ ອະນຸມັດແລ້ວ</button>
+                        <?php else: ?>
+                            <button class="btn-edit" onclick="openEditEnroll(<?php echo $enroll['Enroll_id']; ?>,<?php echo $enroll['Lesson_id']; ?>,'<?php echo addslashes($enroll['Status']); ?>')">✏️ ແກ້ໄຂ</button>
+                            <button class="btn-delete" onclick="confirmDeleteEnroll(<?php echo $enroll['Enroll_id']; ?>)">🗑️ ລຶບ</button>
+                        <?php endif; ?>
+                    <?php elseif ($is_teacher): ?>
+                        <?php if (! isset($enroll['approve']) || $enroll['approve'] != 1): ?>
+                            <form method="POST" action="home.php?class_id=<?php echo $class_id; ?>" style="display:inline;">
+                            <input type="hidden" name="enroll_id" value="<?php echo $enroll['Enroll_id']; ?>">
+                            <button type="submit" name="approve_enrollment" class="btn-edit" style="background:#e8f5e9;color:#2e7d32;border:1px solid #a5d6a7;">✅ ອະນຸມັດ</button>
+                            </form>
+                        <?php else: ?>
+                            <button class="btn-edit" style="background:#e8f5e9;color:#2e7d32;border:1px solid #a5d6a7;opacity:0.5;cursor:not-allowed;" disabled>✅ ອະນຸມັດແລ້ວ</button>
+                        <?php endif; ?>
+                        <button class="btn-delete" onclick="confirmDeleteEnrollTeacher(<?php echo $enroll['Enroll_id']; ?>)">🗑️ ລຶບ</button>
+                    <?php endif; ?>
+                </div>
+                </div>
+            <?php endforeach; ?>
+            <?php else: ?>
+            <p style="color:#999;grid-column:1/-1;padding:20px 0;">ບໍ່ພົບການລົງທະບຽນ.</p>
+            <?php endif; ?>
+        </div>
+        </div>
+
 
     <!-- ===== SUBMIT EXAM PANEL ===== -->
     <div id="submit_exam" class="tab-panel">
@@ -1552,8 +1597,21 @@
             <label>ເລືອກການລົງທະບຽນ</label>
             <select name="enroll_id">
                 <option value="">-- ເລືອກການລົງທະບຽນ (ທາງເລືອກ) --</option>
-                <?php foreach ($student_enrollments as $en): ?>
-                    <option value="<?php echo $en['Enroll_id']; ?>">[#<?php echo $en['Enroll_id']; ?>] <?php echo htmlspecialchars($en['Lesson_name']); ?></option>
+                <?php foreach ($student_enrollments as $en): 
+                    // Check if this enrollment is approved
+                    $is_approved = false;
+                    foreach ($enrollments as $enroll) {
+                        if ($enroll['Enroll_id'] == $en['Enroll_id'] && isset($enroll['approve']) && $enroll['approve'] == 1) {
+                            $is_approved = true;
+                            break;
+                        }
+                    }
+                    $disabled = !$is_approved ? 'disabled style="color:#aaa;"' : '';
+                    $suffix = !$is_approved ? ' ⏳ ລໍຖ້າອະນຸມັດ' : ' ✅ ອະນຸມັດແລ້ວ';
+                ?>
+                    <option value="<?php echo $en['Enroll_id']; ?>" <?php echo $disabled; ?>>
+                        [#<?php echo $en['Enroll_id']; ?>] <?php echo htmlspecialchars($en['Lesson_name']); ?><?php echo $suffix; ?>
+                    </option>
                 <?php endforeach; ?>
             </select>
             <label>ອັບໂຫຼດ PDF ຄຳຕອບ <span style="color:#e53935">*</span></label>
@@ -1788,6 +1846,21 @@
         document.getElementById('confirmEnrollOverlay').classList.remove('open');
     }
 
+    function confirmDeleteEnrollTeacher(enrollId) {
+    if (confirm('ທ່ານແນ່ໃຈບໍ່ວ່າຕ້ອງການລຶບການລົງທະບຽນນີ້?')) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = 'home.php?class_id=<?php echo $class_id; ?>';
+        const input1 = document.createElement('input');
+        input1.type = 'hidden'; input1.name = 'enroll_id'; input1.value = enrollId;
+        const input2 = document.createElement('input');
+        input2.type = 'hidden'; input2.name = 'delete_enrollment_teacher'; input2.value = '1';
+        form.appendChild(input1);
+        form.appendChild(input2);
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
     <?php if ($is_teacher): ?>
     function openEditLesson(id, name, typeId, filePath) {
         document.getElementById('edit_lesson_id').value       = id;
