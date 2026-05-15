@@ -70,7 +70,7 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Phetsarath OT', sans-serif;
             background: linear-gradient(135deg, #1a73e8, #0d47a1);
             display: flex;
             justify-content: center;
@@ -135,7 +135,7 @@
     </style>
 </head>
 <body>
-<div class="form-container">
+<div class="form-container" style="font-family: 'Phetsarath OT', serif;">
     <h2>📝 ລົງທະບຽນ</h2>
 
     <?php if ($error): ?>
@@ -147,27 +147,27 @@
         <div class="form-group">
             <label>ເລືອກບົດບາດ (Role)</label>
             <div class="role-selector">
-                <button type="button" class="role-btn active" id="btn-student" onclick="selectRole('student')">🎓 ນັກຮຽນ</button>
-                <button type="button" class="role-btn" id="btn-teacher" onclick="selectRole('teacher')">👨‍🏫 ຄູສອນ</button>
+                <button type="button" class="role-btn active" id="btn-student" onclick="selectRole('student')" style="font-family: 'Phetsarath OT', serif;">🎓 ນັກຮຽນ</button>
+                <button type="button" class="role-btn" id="btn-teacher" onclick="selectRole('teacher')" style="font-family: 'Phetsarath OT', serif;">👨‍🏫 ຄູສອນ</button>
             </div>
             <input type="hidden" name="role" id="role" value="student">
         </div>
 
         <div class="form-group">
-            <label id="name-label">ຊື່ເຕັມນັກຮຽນ (Student Full Name)</label>
-            <input type="text" name="full_name" id="full_name" placeholder="ກະລຸນາໃສ່ຊື່ເຕັມ"
+            <label id="name-label" style="font-family: 'Phetsarath OT', serif;">ຊື່ເຕັມນັກຮຽນ (Student Full Name)</label>
+            <input style="font-family: 'Phetsarath OT', serif;" type="text" name="full_name" id="full_name" placeholder="ກະລຸນາໃສ່ຊື່ເຕັມ"
                 value="<?php echo isset($_POST['full_name']) ? htmlspecialchars($_POST['full_name']) : ''; ?>" required>
         </div>
         <div class="form-group">
             <label>ອີເມວ (Email)</label>
-            <input type="email" name="Email" placeholder="ກະລຸນາໃສ່ອີເມວ"
+            <input style="font-family: 'Phetsarath OT', serif;" type="email" name="Email" placeholder="ກະລຸນາໃສ່ອີເມວ"
                 value="<?php echo isset($_POST['Email']) ? htmlspecialchars($_POST['Email']) : ''; ?>" required>
         </div>
         <div class="form-group">
             <label>ລະຫັດຜ່ານ (Password)</label>
-            <input type="password" name="Password" placeholder="ຢ່າງໜ້ອຍ 6 ຕົວອັກສອນ" required>
+            <input style="font-family: 'Phetsarath OT', serif;" type="password" name="Password" placeholder="ຢ່າງໜ້ອຍ 6 ຕົວອັກສອນ" required>
         </div>
-        <button type="submit">ລົງທະບຽນ</button>
+        <button style="font-family: 'Phetsarath OT', serif;" type="submit">ລົງທະບຽນ</button>
     </form>
 
     <div class="login-link">

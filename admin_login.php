@@ -135,7 +135,7 @@
     </style>
 </head>
 <body>
-    <div class="login-card">
+    <div class="login-card" style="font-family: 'Time New Roman', serif;">
         <h2>🔐 Admin Login</h2>
 
         <?php if (! empty($error)): ?>

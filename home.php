@@ -1101,10 +1101,9 @@
     <a href="class.php" class="btn-back">← ກັບໄປຫ້ອງຮຽນ</a>
 </div>
 
-<div class="main-content">
-
+<div class="main-content" style= "font-family: Times New Roman">
     <!-- TAB NAV -->
-    <div class="tab-nav">
+    <div class="tab-nav" >
         <button class="tab-btn active" onclick="showTab('lessons', this)">📚 ບົດຮຽນ</button>
         <button class="tab-btn" onclick="showTab('exams', this)">📝 ການສອບເສັງ</button>
         <?php if ($is_teacher): ?>
@@ -1124,6 +1123,7 @@
         <?php if ($error_msg && ! isset($_GET['tab'])): ?>
             <div class="alert-error" id="errorAlert">❌ <?php echo htmlspecialchars($error_msg); ?></div>
         <?php endif; ?>
+        
         <div class="section-header">
             <h3>📚 ບົດຮຽນ</h3>
             <?php if ($is_teacher): ?>
