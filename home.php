@@ -765,7 +765,7 @@
         .btn-back:hover { background: rgba(255,255,255,0.35); }
 
         /* ===== MAIN CONTENT ===== */
-        .main-content { max-width: 1200px; margin: 0 auto; padding: 28px 24px; }
+        .main-content { margin: 0 auto; padding: 28px 24px; }
 
         /* ===== TAB NAV ===== */
         .tab-nav {
