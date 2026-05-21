@@ -176,7 +176,7 @@
     </form>
 
     <div class="footer-text">
-        ທ່ານມີບັນຊີແລ້ວບໍ? <a href="register.php">ລົງທະບຽນ</a>
+        <!-- Don't have an account? <a href="register.php">Register</a> -->
     </div>
 </div>
 

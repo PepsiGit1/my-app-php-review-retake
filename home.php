@@ -765,7 +765,7 @@
         .btn-back:hover { background: rgba(255,255,255,0.35); }
 
         /* ===== MAIN CONTENT ===== */
-        .main-content { max-width: 1200px; margin: 0 auto; padding: 28px 24px; }
+        .main-content { margin: 0 auto; padding: 28px 24px; }
 
         /* ===== TAB NAV ===== */
         .tab-nav {
@@ -835,6 +835,7 @@
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
             gap: 18px;
+            font-size: 20px;
         }
         .item-card {
             background: #fff;

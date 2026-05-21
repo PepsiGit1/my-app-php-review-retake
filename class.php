@@ -172,7 +172,7 @@
         }
 
         /* MAIN */
-        .main { max-width: 1140px; margin: -30px auto 60px; padding: 0 24px; position: relative; z-index: 1; }
+        .main { max-width: "100%"; margin: -30px auto 60px; padding: 0 24px; position: relative; z-index: 1; }
 
         /* STATS BAR */
         .stats-bar {
