@@ -21,7 +21,7 @@
     } elseif (strlen($password) < 6) {
         $error = "ລະຫັດຜ່ານຕ້ອງມີຢ່າງໜ້ອຍ 6 ຕົວອັກສອນ!";
     } else {
-        $check = $conn->prepare("SELECT * FROM tb_Teacher WHERE Email = ?");
+        $check = $conn->prepare("SELECT * FROM tb_Student WHERE Email = ?");
         if (! $check) {
             $error = "DB Error: " . $conn->error;
         } else {
@@ -32,7 +32,7 @@
             if ($check->num_rows > 0) {
                 $error = "Email ມີຢູ່ແລ້ວ!";
             } else {
-                $stmt = $conn->prepare("INSERT INTO tb_Teacher (Teacher_fullname, Email, Password) VALUES (?, ?, ?)");
+                $stmt = $conn->prepare("INSERT INTO tb_Student (Student_full_name, Email, Password) VALUES (?, ?, ?)");
                 if (! $stmt) {
                     $error = "DB Error: " . $conn->error;
                 } else {
@@ -57,7 +57,7 @@
 <html lang="lo">
 <head>
     <meta charset="UTF-8">
-    <title>ລົງທະບຽນຄູສອນ</title>
+    <title>ລົງທະບຽນນັກຮຽນ</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -106,7 +106,7 @@
 </head>
 <body>
 <div class="form-container">
-    <h2>👨‍🏫 ລົງທະບຽນຄູສອນ</h2>
+    <h2>🎓 ລົງທະບຽນນັກຮຽນ</h2>
 
     <?php if ($error): ?>
         <p class="error">⚠️ <?php echo htmlspecialchars($error); ?></p>
@@ -114,7 +114,7 @@
 
     <form method="POST" action="">
         <div class="form-group">
-            <label>ຊື່ເຕັມຄູສອນ (Teacher Full Name)</label>
+            <label>ຊື່ເຕັມນັກຮຽນ (Student Full Name)</label>
             <input type="text" name="full_name" placeholder="ກະລຸນາໃສ່ຊື່ເຕັມ"
                 value="<?php echo isset($_POST['full_name']) ? htmlspecialchars($_POST['full_name']) : ''; ?>" required>
         </div>

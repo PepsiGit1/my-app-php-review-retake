@@ -835,6 +835,7 @@
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
             gap: 18px;
+            font-size: 20px;
         }
         .item-card {
             background: #fff;

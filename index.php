@@ -176,7 +176,7 @@
     </form>
 
     <div class="footer-text">
-        Don't have an account? <a href="register.php">Register</a>
+        <!-- Don't have an account? <a href="register.php">Register</a> -->
     </div>
 </div>
 
