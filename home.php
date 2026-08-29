@@ -733,6 +733,50 @@
     }
     }
 
+    // ===== Build Student Exam Report =====
+    $report_rows = [];
+    if ($is_teacher) {
+    $grouped = [];
+    foreach ($all_submissions as $sub) {
+        $sid = $sub['Student_id'];
+        if (! isset($grouped[$sid])) {
+            $grouped[$sid] = [
+                'Student_id'        => $sid,
+                'Student_full_name' => $sub['Student_full_name'],
+                'exams'             => [],
+                'scores'            => [],
+            ];
+        }
+        $grouped[$sid]['exams'][] = $sub;
+        if ($sub['Score'] !== null) {$grouped[$sid]['scores'][] = $sub['Score'];}
+    }
+    foreach ($grouped as $sid => $data) {
+        $avg           = count($data['scores']) ? array_sum($data['scores']) / count($data['scores']) : null;
+        $report_rows[] = [
+            'Student_id'        => $sid,
+            'Student_full_name' => $data['Student_full_name'],
+            'exam_count'        => count($data['exams']),
+            'graded_count'      => count($data['scores']),
+            'average_score'     => $avg,
+            'exams'             => $data['exams'],
+        ];
+    }
+    usort($report_rows, function ($a, $b) {
+        if ($a['average_score'] === null && $b['average_score'] === null) {return 0;}
+        if ($a['average_score'] === null) {return 1;}
+        if ($b['average_score'] === null) {return -1;}
+        return $b['average_score'] <=> $a['average_score'];
+    });
+    }
+
+    $my_report = ['exam_count' => 0, 'graded_count' => 0, 'average_score' => null];
+    if ($is_student) {
+    $my_scores                  = array_values(array_filter(array_map(fn($s) => $s['Score'], $submissions), fn($v) => $v !== null));
+    $my_report['exam_count']    = count($submissions);
+    $my_report['graded_count']  = count($my_scores);
+    $my_report['average_score'] = count($my_scores) ? array_sum($my_scores) / count($my_scores) : null;
+    }
+
     $conn->close();
 ?>
 <!DOCTYPE html>
@@ -1134,6 +1178,8 @@
         <button class="tab-btn" onclick="showTab('enrollment', this)">📋 ການລົງທະບຽນ</button>
 
         <button class="tab-btn" onclick="showTab('submit_exam', this)">📤 ສົ່ງການສອບເສັງ</button>
+
+        <button class="tab-btn" onclick="showTab('report', this)">📈 ລາຍງານ</button>
     </div>
 
     <!-- ===== LESSON PANEL ===== -->
@@ -1144,7 +1190,7 @@
         <?php if ($error_msg && ! isset($_GET['tab'])): ?>
             <div class="alert-error" id="errorAlert">❌ <?php echo htmlspecialchars($error_msg); ?></div>
         <?php endif; ?>
-        
+
         <div class="section-header">
             <h3>📚 ບົດຮຽນ</h3>
             <?php if ($is_teacher): ?>
@@ -1504,6 +1550,84 @@
                             <?php endforeach; ?>
                         <?php else: ?>
                             <tr><td colspan="8" style="text-align:center;color:#aaa;padding:30px;">ຍັງບໍ່ມີການສົ່ງ.</td></tr>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+        <?php endif; ?>
+    </div>
+
+    <!-- ===== REPORT PANEL ===== -->
+    <div id="report" class="tab-panel">
+        <?php if ($is_teacher): ?>
+            <div class="section-header"><h3>📈 ລາຍງານຄະແນນສອບເສັງນັກຮຽນ</h3></div>
+            <div style="overflow-x:auto;margin-top:10px;">
+                <table class="submit-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>ນັກຮຽນ</th>
+                            <th>ຈຳນວນວິຊາຮຽນ</th>
+                            <th>ກວດແລ້ວ</th>
+                            <th>ຄະແນນສະເລ່ຍ</th>
+                            <th>ລາຍລະອຽດການສອບເສັງ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if (! empty($report_rows)): ?>
+                            <?php foreach ($report_rows as $i => $r): ?>
+                                <tr>
+                                    <td style="color:#999;font-weight:600;"><?php echo $i + 1; ?></td>
+                                    <td>👤 <?php echo htmlspecialchars($r['Student_full_name']); ?></td>
+                                    <td><?php echo $r['exam_count']; ?></td>
+                                    <td><?php echo $r['graded_count']; ?></td>
+                                    <td style="font-weight:700;color:#1a73e8;">
+                                        <?php echo $r['average_score'] !== null ? number_format($r['average_score'], 1) : '—'; ?>
+                                    </td>
+                                    <td>
+                                        <?php foreach ($r['exams'] as $ex): ?>
+                                            <span class="type-tag" style="background:<?php echo $ex['Submit_Status'] === 'Graded' ? '#e8f5e9' : '#fff8e1'; ?>;color:<?php echo $ex['Submit_Status'] === 'Graded' ? '#2e7d32' : '#f57c00'; ?>;">
+                                                📝 <?php echo htmlspecialchars($ex['Exam_name']); ?>: <?php echo $ex['Score'] !== null ? $ex['Score'] : '—'; ?>
+                                            </span>
+                                        <?php endforeach; ?>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <tr><td colspan="6" style="text-align:center;color:#aaa;padding:30px;">ຍັງບໍ່ມີຂໍ້ມູນລາຍງານ.</td></tr>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+        <?php elseif ($is_student): ?>
+            <div class="section-header"><h3>📈 ລາຍງານຄະແນນຂອງຂ້ອຍ</h3></div>
+            <div class="info-row">
+                <div class="info-box"><span>📤 ສົ່ງແລ້ວ</span><strong><?php echo $my_report['exam_count']; ?></strong></div>
+                <div class="info-box"><span>✅ ຕັດເກຣດແລ້ວ</span><strong><?php echo $my_report['graded_count']; ?></strong></div>
+                <div class="info-box"><span>🏆 ຄະແນນສະເລ່ຍ</span><strong><?php echo $my_report['average_score'] !== null ? number_format($my_report['average_score'], 1) : '—'; ?></strong></div>
+            </div>
+            <div style="overflow-x:auto;margin-top:10px;">
+                <table class="submit-table">
+                    <thead>
+                        <tr><th>#</th><th>ການສອບເສັງ</th><th>ສະຖານະ</th><th>ຄະແນນ</th><th>ວັນທີ</th></tr>
+                    </thead>
+                    <tbody>
+                        <?php if (! empty($submissions)): ?>
+                            <?php foreach ($submissions as $i => $sub): ?>
+                                <tr>
+                                    <td style="color:#999;font-weight:600;"><?php echo $i + 1; ?></td>
+                                    <td>📝 <?php echo htmlspecialchars($sub['Exam_name']); ?></td>
+                                    <td>
+                                        <span class="<?php echo $sub['Submit_Status'] === 'Graded' ? 'badge-graded' : 'badge-submitted'; ?>">
+                                            <?php echo $sub['Submit_Status'] === 'Graded' ? '✅' : '⏳'; ?> <?php echo htmlspecialchars($sub['Submit_Status']); ?>
+                                        </span>
+                                    </td>
+                                    <td style="font-weight:700;color:#1a73e8;"><?php echo $sub['Score'] !== null ? $sub['Score'] : '—'; ?></td>
+                                    <td style="color:#aaa;font-size:12px;"><?php echo date('d M Y H:i', strtotime($sub['Submit_date'])); ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <tr><td colspan="5" style="text-align:center;color:#aaa;padding:30px;">ຍັງບໍ່ມີການສົ່ງ.</td></tr>
                         <?php endif; ?>
                     </tbody>
                 </table>
