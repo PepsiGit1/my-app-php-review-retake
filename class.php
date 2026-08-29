@@ -347,14 +347,13 @@
 <!-- HERO -->
 <div class="hero">
     <h1>ຍິນດີຕ້ອນຮັບ, <?php echo htmlspecialchars($displayName); ?> 👋</h1>
-    <p>ເລືອກຫ້ອງຮຽນຂອງທ່ານເພື່ອເລີ່ມຕົ້ນການຮຽນ , ສອບເສັງ ແລະ ສອບເສັງຄືນ</p>
+    <h3>ເລືອກຫ້ອງຮຽນຂອງທ່ານເພື່ອເລີ່ມຕົ້ນການຮຽນ , ສອບເສັງ ແລະ ສອບເສັງຄືນ</h3>
     <svg class="hero-wave" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 40">
         <path fill="#f1f5f9" d="M0,32L1440,0L1440,40L0,40Z"/>
     </svg>
 </div>
 
 <div class="main">
-
     <!-- STATS -->
     <div class="stats-bar">
         <div class="stat-card">
@@ -425,7 +424,7 @@
     </div>
 </div>
 
-<div class="footer">© <?php echo date('Y'); ?> Review and Retake Exams · ລະບົບຈັດການຫ້ອງຮຽນ</div>
+<div class="footer">© <?php echo date('Y'); ?> Review and Retake Exams · ລະບົບຈັດການຫ້ອງຮຽນ By Laemphet Vilaichit</div>
 
 </body>
 </html>

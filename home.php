@@ -694,14 +694,34 @@
     $all_enrollments = [];
     if ($is_teacher) {
     $all_enroll_stmt = $conn->prepare("
-    SELECT en.Enroll_id, en.Enroll_date, en.Status, en.approve,
-           en.Student_id, en.Lesson_id, en.Room_id,
-           l.Lesson_name,
-           COALESCE(s.Student_full_name, 'Unknown') AS Student_full_name
+    SELECT
+        en.Enroll_id,
+        en.Enroll_date,
+        en.Status,
+        en.approve,
+        en.Student_id,
+        en.Lesson_id,
+        en.Room_id,
+
+        l.Lesson_name,
+
+        COALESCE(s.Student_full_name, 'Unknown') AS Student_full_name,
+
+        r.Room_name
+
     FROM tb_Enrollment en
-    LEFT JOIN tb_Lesson l ON en.Lesson_id = l.Lesson_id
-    LEFT JOIN tb_Student s ON en.Student_id = s.Student_id
+
+    LEFT JOIN tb_Lesson l
+        ON en.Lesson_id = l.Lesson_id
+
+    LEFT JOIN tb_Student s
+        ON en.Student_id = s.Student_id
+
+    LEFT JOIN tb_Room r
+        ON en.Room_id = r.Room_id
+
     WHERE en.Room_id = ?
+
     ORDER BY en.Enroll_date DESC
 ");
     if ($all_enroll_stmt) {
@@ -1296,6 +1316,7 @@
                         <th>ນັກຮຽນ</th>
                         <th>ບົດຮຽນ</th>
                         <th>ສະຖານະ</th>
+                        <th>ຫອ້ງ</th>
                         <th>ວັນທີລົງທະບຽນ</th>
                     </tr>
                 </thead>
@@ -1312,6 +1333,7 @@
                                         <?php echo htmlspecialchars($enroll['Status']); ?>
                                     </span>
                                 </td>
+                                <td><?php echo htmlspecialchars($enroll['Room_name'] ?? '-'); ?></td>
                                 <td style="color:#aaa;font-size:12px;">📅 <?php echo date('d M Y H:i', strtotime($enroll['Enroll_date'])); ?></td>
                             </tr>
                         <?php endforeach; ?>
@@ -1352,7 +1374,7 @@
                     <strong>👤 <?php echo htmlspecialchars($enroll['Student_full_name'] ?? 'Unknown'); ?></strong>
                 <?php endif; ?>
                 <strong><?php echo htmlspecialchars($enroll['Lesson_name'] ?? 'ບໍ່ມີ'); ?></strong>
-                <span class="type-tag">🏫 ຫ້ອງ: <?php echo htmlspecialchars($enroll['Room_id']); ?></span>
+                <span class="type-tag">🏫 ຫ້ອງ: <?php echo htmlspecialchars($enroll['Room_name']); ?></span>
                 <span class="type-tag">👤 ລະຫັດນັກຮຽນ: <?php echo htmlspecialchars($enroll['Student_id']); ?></span>
                 <span class="type-tag">📖 ລະຫັດບົດຮຽນ: <?php echo htmlspecialchars($enroll['Lesson_id']); ?></span>
                 <span class="type-tag" style="background:<?php echo $enroll['Status'] === 'Completed' ? '#e8f5e9' : '#e8f0fe'; ?>;color:<?php echo $enroll['Status'] === 'Completed' ? '#2e7d32' : '#1a73e8'; ?>;">
@@ -1598,17 +1620,17 @@
             <label>ເລືອກການລົງທະບຽນ</label>
             <select name="enroll_id">
                 <option value="">-- ເລືອກການລົງທະບຽນ (ທາງເລືອກ) --</option>
-                <?php foreach ($student_enrollments as $en): 
-                    // Check if this enrollment is approved
-                    $is_approved = false;
-                    foreach ($enrollments as $enroll) {
-                        if ($enroll['Enroll_id'] == $en['Enroll_id'] && isset($enroll['approve']) && $enroll['approve'] == 1) {
-                            $is_approved = true;
-                            break;
+                <?php foreach ($student_enrollments as $en):
+                        // Check if this enrollment is approved
+                        $is_approved = false;
+                        foreach ($enrollments as $enroll) {
+                            if ($enroll['Enroll_id'] == $en['Enroll_id'] && isset($enroll['approve']) && $enroll['approve'] == 1) {
+                                $is_approved = true;
+                                break;
+                            }
                         }
-                    }
-                    $disabled = !$is_approved ? 'disabled style="color:#aaa;"' : '';
-                    $suffix = !$is_approved ? ' ⏳ ລໍຖ້າອະນຸມັດ' : ' ✅ ອະນຸມັດແລ້ວ';
+                        $disabled = ! $is_approved ? 'disabled style="color:#aaa;"' : '';
+                        $suffix   = ! $is_approved ? ' ⏳ ລໍຖ້າອະນຸມັດ' : ' ✅ ອະນຸມັດແລ້ວ';
                 ?>
                     <option value="<?php echo $en['Enroll_id']; ?>" <?php echo $disabled; ?>>
                         [#<?php echo $en['Enroll_id']; ?>] <?php echo htmlspecialchars($en['Lesson_name']); ?><?php echo $suffix; ?>

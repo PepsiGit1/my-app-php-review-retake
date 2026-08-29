@@ -61,7 +61,7 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Phetsarath OT', sans-serif;
             background: linear-gradient(135deg, #1a73e8, #0d47a1);
             display: flex;
             justify-content: center;
@@ -120,14 +120,14 @@
         </div>
         <div class="form-group">
             <label>ອີເມວ (Email)</label>
-            <input type="email" name="Email" placeholder="ກະລຸນາໃສ່ອີເມວ"
+            <input style="font-family: 'Phetsarath OT', serif;" type="email" name="Email" placeholder="ກະລຸນາໃສ່ອີເມວ"
                 value="<?php echo isset($_POST['Email']) ? htmlspecialchars($_POST['Email']) : ''; ?>" required>
         </div>
         <div class="form-group">
             <label>ລະຫັດຜ່ານ (Password)</label>
-            <input type="password" name="Password" placeholder="ຢ່າງໜ້ອຍ 6 ຕົວອັກສອນ" required>
+            <input style="font-family: 'Phetsarath OT', serif;" type="password" name="Password" placeholder="ຢ່າງໜ້ອຍ 6 ຕົວອັກສອນ" required>
         </div>
-        <button type="submit">ລົງທະບຽນ</button>
+        <button style="font-family: 'Phetsarath OT', serif;" type="submit">ລົງທະບຽນ</button>
     </form>
 
     <div class="login-link">

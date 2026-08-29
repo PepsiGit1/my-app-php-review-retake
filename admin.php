@@ -348,11 +348,33 @@
     $result   = $conn->query("SELECT Teacher_id, Teacher_fullname, Email FROM tb_Teacher ORDER BY Teacher_id DESC");
     $teachers = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
 
-    $result   = $conn->query("SELECT Student_id, Student_full_name, Email FROM tb_Student ORDER BY Student_id DESC");
+    $result = $conn->query("
+    SELECT
+        s.Student_id,
+        s.Student_full_name,
+        s.Email,
+        s.Room_id,
+        r.Room_name
+    FROM tb_Student AS s
+    LEFT JOIN tb_Room AS r
+        ON s.Room_id = r.Room_id
+    ORDER BY s.Student_id DESC
+");
     $students = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
 
-    $result = $conn->query("SELECT Room_id, Room_name FROM tb_Room ORDER BY Room_id DESC");
-    $rooms  = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
+    $result = $conn->query("
+        SELECT
+            r.Room_id,
+            r.Room_name,
+            COUNT(s.Student_id) AS Student_count
+        FROM tb_Room r
+        LEFT JOIN tb_Student s
+            ON r.Room_id = s.Room_id
+        GROUP BY r.Room_id, r.Room_name
+        ORDER BY r.Room_id DESC
+    ");
+
+    $rooms = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
 
     $result       = $conn->query("SELECT L_Type_id, L_Type_name FROM tb_Lesson_Type ORDER BY L_Type_id DESC");
     $lesson_types = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
@@ -604,7 +626,7 @@
     </div>
     <div class="table-card">
         <table class="modern-table">
-            <thead><tr><th>#</th><th>ID</th><th>Full Name</th><th>Email</th><th>Actions</th></tr></thead>
+            <thead><tr><th>#</th><th>ID</th><th>Full Name</th><th>Email</th><th>Room</th><th>Actions</th></tr></thead>
             <tbody>
             <?php if ($students): foreach ($students as $i => $s): ?>
             <tr>
@@ -612,6 +634,7 @@
                 <td><span class="id-badge">#<?php echo $s['Student_id'] ?></span></td>
                 <td><strong><?php echo htmlspecialchars($s['Student_full_name']) ?></strong></td>
                 <td><?php echo htmlspecialchars($s['Email'] ?? '—') ?></td>
+	            <td><?php echo htmlspecialchars($s['Room_name'] ?? '—') ?></td>
                 <td><div class="table-actions">
                     <button class="btn-edit" onclick="openEdit('editStudentModal',{Student_id:'<?php echo $s['Student_id'] ?>',Student_full_name:'<?php echo addslashes(htmlspecialchars($s['Student_full_name'])) ?>',Student_email:'<?php echo addslashes(htmlspecialchars($s['Email'] ?? '')) ?>'})"><i class="bi bi-pencil"></i></button>
                     <form method="POST" onsubmit="return confirm('Delete this student?')">
@@ -657,13 +680,18 @@
     </div>
     <div class="table-card">
         <table class="modern-table">
-            <thead><tr><th>#</th><th>ID</th><th>Room Name</th><th>Actions</th></tr></thead>
+            <thead><tr><th>#</th><th>ID</th><th>Room Name</th><th>Student</th><th>Actions</th></tr></thead>
             <tbody>
             <?php if ($rooms): foreach ($rooms as $i => $r): ?>
             <tr>
                 <td><?php echo $i + 1 ?></td>
                 <td><span class="id-badge">#<?php echo $r['Room_id'] ?></span></td>
                 <td><strong><?php echo htmlspecialchars($r['Room_name']) ?></strong></td>
+	        <td>
+            <span class="id-badge">
+                <?php echo $r['Student_count'] ?> students
+            </span>
+	        </td>
                 <td><div class="table-actions">
                     <button class="btn-edit" onclick="openEdit('editRoomModal',{Room_id:'<?php echo $r['Room_id'] ?>',Room_name:'<?php echo addslashes(htmlspecialchars($r['Room_name'])) ?>'})"><i class="bi bi-pencil"></i></button>
                     <form method="POST" onsubmit="return confirm('Delete this room?')">

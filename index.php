@@ -166,13 +166,13 @@
     <form action="" method="POST">
         <div class="form-group">
             <label for="username">Username</label>
-            <input type="text" id="username" name="username" placeholder="Enter your username" required>
+            <input type="text" id="username" name="username" placeholder="ປ້ອນຊື່ຂອງເຈົ້າ" required>
         </div>
         <div class="form-group">
             <label for="password">Password</label>
-            <input type="password" id="password" name="password" placeholder="Enter your password" required>
+            <input type="password" id="password" name="password" placeholder="ປ້ອນລະຫັດຜ່ານຂອງເຈົ້າ" required>
         </div>
-        <button type="submit" class="btn-login" id="loginBtn">Login</button>
+        <button type="submit" class="btn-login" id="loginBtn">ເຂົ້າສູ່ລະບົບ</button>
     </form>
 
     <div class="footer-text">
