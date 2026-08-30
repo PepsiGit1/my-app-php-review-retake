@@ -1550,6 +1550,165 @@
         .analysis-card .a-label { color: #777; font-size: 13px; margin-bottom: 8px; font-weight: 500; }
         .analysis-card .a-count { font-size: 40px; font-weight: 700; color: #1a73e8; line-height: 1; }
         .analysis-card .a-count.green { color: #2e7d32; }
+        /* ================================
+   Student Report Footer
+================================ */
+
+.student-report-footer td {
+    padding: 0 !important;
+    border: none !important;
+    background: transparent !important;
+}
+
+.student-footer-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 16px 20px;
+
+    background: #f8fbff;
+
+    border-top: 1px solid #dbeafe;
+    border-bottom: 1px solid #dbeafe;
+
+    min-height: 70px;
+
+    box-sizing: border-box;
+}
+
+
+/* Left */
+
+.student-footer-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+
+/* Icon */
+
+.student-footer-icon {
+    width: 42px;
+    height: 42px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #eaf3ff;
+
+    border: 1px solid #d7e9ff;
+
+    border-radius: 12px;
+
+    font-size: 20px;
+}
+
+
+/* Label */
+
+.student-footer-label {
+    color: #64748b;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    margin-right: 8px;
+}
+
+
+/* Number */
+
+.student-footer-count {
+    color: #1a73e8;
+
+    font-size: 22px;
+    font-weight: 800;
+
+    line-height: 1;
+}
+
+
+/* Unit */
+
+.student-footer-unit {
+    color: #64748b;
+
+    font-size: 13px;
+    font-weight: 500;
+
+    margin-left: 4px;
+}
+
+
+/* Status */
+
+.student-footer-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    padding: 7px 12px;
+
+    background: #ffffff;
+
+    border: 1px solid #e2e8f0;
+
+    border-radius: 20px;
+
+    color: #64748b;
+
+    font-size: 12px;
+    font-weight: 500;
+}
+
+
+/* Status dot */
+
+.student-footer-status span {
+    width: 7px;
+    height: 7px;
+
+    display: block;
+
+    background: #22c55e;
+
+    border-radius: 50%;
+
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.12);
+}
+
+
+/* Hover */
+
+.student-footer-content {
+    transition: background 0.2s ease;
+}
+
+.student-footer-content:hover {
+    background: #f1f7ff;
+}
+
+
+/* Mobile */
+
+@media (max-width: 600px) {
+
+    .student-footer-content {
+        flex-direction: column;
+        align-items: flex-start;
+
+        gap: 12px;
+
+        padding: 14px 16px;
+    }
+
+    .student-footer-status {
+        align-self: flex-start;
+    }
+}
     </style>
 </head>
 <body>
@@ -2061,6 +2220,42 @@
                         <?php endif; ?>
                     </tbody>
                 </table>
+<?php if (!empty($full_student_report)): ?>
+    <tfoot class="student-report-footer">
+        <tr>
+            <td colspan="9">
+                <div class="student-footer-content">
+
+                    <div class="student-footer-left">
+                        <div class="student-footer-icon">
+                            🎓
+                        </div>
+
+                        <div>
+                            <span class="student-footer-label">
+                                ນັກຮຽນທັງໝົດ
+                            </span>
+
+                            <span class="student-footer-count">
+                                <?php echo count($full_student_report); ?>
+                            </span>
+
+                            <span class="student-footer-unit">
+                                ຄົນ
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="student-footer-status">
+                        <span></span>
+                        ຂໍ້ມູນລາຍງານ
+                    </div>
+
+                </div>
+            </td>
+        </tr>
+    </tfoot>
+<?php endif; ?>
             </div>
         <?php elseif ($is_student): ?>
             <div class="section-header"><h3>📈 ລາຍງານຄະແນນຂອງຂ້ອຍ</h3></div>
