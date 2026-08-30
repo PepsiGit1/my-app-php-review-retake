@@ -808,21 +808,112 @@
         exit();
     }
 
-    if (isset($_FILES['submit_pdf']) && $_FILES['submit_pdf']['error'] === UPLOAD_ERR_OK) {
-        $upload_dir = __DIR__ . "/uploads/submissions/";
-        if (! is_dir($upload_dir)) {mkdir($upload_dir, 0777, true);}
-        $file_ext = strtolower(pathinfo($_FILES['submit_pdf']['name'], PATHINFO_EXTENSION));
-        $finfo    = finfo_open(FILEINFO_MIME_TYPE);
-        $mime     = finfo_file($finfo, $_FILES['submit_pdf']['tmp_name']);
-        finfo_close($finfo);
-        if ($file_ext === "pdf" && $mime === "application/pdf") {
-            $new_filename = substr(md5(uniqid()), 0, 12) . ".pdf";
-            $target_path  = $upload_dir . $new_filename;
-            if (move_uploaded_file($_FILES['submit_pdf']['tmp_name'], $target_path)) {
-                $file_path = "uploads/submissions/" . $new_filename;
-            } else { $error_msg = "ການຍ້າຍໄຟລ໌ທີ່ອັບໂຫຼດລົ້ມເຫລວ.";}
-        } else { $error_msg = "ອະນຸຍາດໃຫ້ເທົ່ານັ້ນໄຟລ໌ PDF.";}
-    } else { $error_msg = "ກະລຸນາອັບໂຫຼດໄຟລ໌ PDF.";}
+    if (isset($_FILES['submit_pdf'])) {
+
+        echo '<pre>';
+        print_r($_FILES['submit_pdf']);
+        echo '</pre>';
+
+        echo 'Upload error: ' . $_FILES['submit_pdf']['error'] . '<br>';
+
+        if ($_FILES['submit_pdf']['error'] === UPLOAD_ERR_OK) {
+
+            $upload_dir = __DIR__ . "/uploads/submissions/";
+
+            echo 'Upload directory: ' . $upload_dir . '<br>';
+
+            echo 'Exists: ';
+            var_dump(is_dir($upload_dir));
+
+            echo 'Writable: ';
+            var_dump(is_writable($upload_dir));
+
+            if (! is_dir($upload_dir)) {
+                mkdir($upload_dir, 0775, true);
+            }
+
+            if (! is_writable($upload_dir)) {
+                $error_msg = "❌ submissions folder ບໍ່ສາມາດຂຽນໄດ້.";
+            } else {
+
+                $file_ext = strtolower(
+                    pathinfo(
+                        $_FILES['submit_pdf']['name'],
+                        PATHINFO_EXTENSION
+                    )
+                );
+
+                $finfo = finfo_open(FILEINFO_MIME_TYPE);
+
+                $mime = finfo_file(
+                    $finfo,
+                    $_FILES['submit_pdf']['tmp_name']
+                );
+
+                finfo_close($finfo);
+
+                echo 'Extension: ' . $file_ext . '<br>';
+                echo 'MIME: ' . $mime . '<br>';
+
+                if (
+                    $file_ext === "pdf" &&
+                    $mime === "application/pdf"
+                ) {
+
+                    $new_filename =
+                        substr(md5(uniqid('', true)), 0, 12)
+                        . ".pdf";
+
+                    $target_path =
+                        $upload_dir . $new_filename;
+
+                    echo 'Target: ' . $target_path . '<br>';
+
+                    if (
+                        move_uploaded_file(
+                            $_FILES['submit_pdf']['tmp_name'],
+                            $target_path
+                        )
+                    ) {
+
+                        echo "UPLOAD SUCCESS";
+
+                        $file_path =
+                            "uploads/submissions/" . $new_filename;
+
+                    } else {
+
+                        echo "MOVE FAILED";
+
+                        $error = error_get_last();
+
+                        echo '<pre>';
+                        print_r($error);
+                        echo '</pre>';
+
+                        $error_msg =
+                            "ການຍ້າຍໄຟລ໌ລົ້ມເຫຼວ.";
+                    }
+
+                } else {
+
+                    $error_msg =
+                        "ອະນຸຍາດໃຫ້ເທົ່ານັ້ນໄຟລ໌ PDF.";
+                }
+            }
+
+        } else {
+
+            $error_msg =
+                "Upload error code: " .
+                $_FILES['submit_pdf']['error'];
+        }
+
+    } else {
+
+        $error_msg =
+            "ກະລຸນາອັບໂຫຼດໄຟລ໌ PDF.";
+    }
 
     if ($error_msg === "") {
         $chk = $conn->prepare("SELECT Submit_id FROM tb_Exam_Submit WHERE Exam_id=? AND Student_id=?");
@@ -2220,7 +2311,7 @@
                         <?php endif; ?>
                     </tbody>
                 </table>
-<?php if (!empty($full_student_report)): ?>
+<?php if (! empty($full_student_report)): ?>
     <tfoot class="student-report-footer">
         <tr>
             <td colspan="9">
