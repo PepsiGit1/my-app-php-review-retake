@@ -2007,7 +2007,7 @@
             <table class="submit-table">
                 <thead>
                     <tr>
-                        <th>#</th>
+                        <th>ລຳດັບ</th>
                         <th>ນັກຮຽນ</th>
                         <th>ບົດຮຽນ</th>
                         <th>ສະຖານະ</th>
@@ -2159,7 +2159,7 @@
                 <table class="submit-table">
                     <thead>
                         <tr>
-                            <th>#</th><th>ນັກຮຽນ</th><th>ການສອບເສັງ</th><th>ສະຖານະ</th>
+                            <th>ລຳດັບ</th><th>ນັກຮຽນ</th><th>ການສອບເສັງ</th><th>ສະຖານະ</th>
                             <th>ຄະແນນ</th><th>ໄຟລ໌</th><th>ວັນທີ</th><th>ການດຳເນີນການ</th>
                         </tr>
                     </thead>
@@ -2219,7 +2219,7 @@
                 <table class="submit-table">
                     <thead>
                         <tr>
-                            <th>#</th>
+                            <th>ລຳດັບ</th>
                             <th>ນັກຮຽນ</th>
                             <th>ຊື່ຫ້ອງຮຽນ</th>
                             <th>ຈຳນວນສົ່ງ</th>
@@ -2282,7 +2282,7 @@
                 <table class="submit-table">
                     <thead>
                         <tr>
-                            <th>#</th>
+                            <th>ລຳດັບ</th>
                             <th>ນັກຮຽນ</th>
                             <th>ຊື່ຫ້ອງຮຽນ</th>
                             <th>ອະນຸມັດແລ້ວ</th>
