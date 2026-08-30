@@ -53,22 +53,24 @@
         $name     = trim($_POST['Student_full_name']);
         $email    = trim($_POST['Student_email']);
         $password = trim($_POST['Student_password']);
-        $stmt     = $conn->prepare("INSERT INTO tb_Student (Student_full_name, Email, Password) VALUES (?,?,?)");
-        $stmt->bind_param("sss", $name, $email, $password);
+        $room_id  = ! empty($_POST['Room_id']) ? intval($_POST['Room_id']) : null;
+        $stmt     = $conn->prepare("INSERT INTO tb_Student (Student_full_name, Email, Password, Room_id) VALUES (?,?,?,?)");
+        $stmt->bind_param("sssi", $name, $email, $password, $room_id);
         $stmt->execute() ? ($message = "Student added!") && ($messageType = 'success')
             : ($message = $stmt->error) && ($messageType = 'danger');
         $stmt->close();
 
     } elseif ($action === 'edit_student') {
-        $name  = trim($_POST['Student_full_name']);
-        $email = trim($_POST['Student_email']);
+        $name    = trim($_POST['Student_full_name']);
+        $email   = trim($_POST['Student_email']);
+        $room_id = ! empty($_POST['Room_id']) ? intval($_POST['Room_id']) : null;
         if (! empty($_POST['Student_password'])) {
             $password = trim($_POST['Student_password']);
-            $stmt     = $conn->prepare("UPDATE tb_Student SET Student_full_name=?, Email=?, Password=? WHERE Student_id=?");
-            $stmt->bind_param("sssi", $name, $email, $password, $_POST['Student_id']);
+            $stmt     = $conn->prepare("UPDATE tb_Student SET Student_full_name=?, Email=?, Password=?, Room_id=? WHERE Student_id=?");
+            $stmt->bind_param("sssii", $name, $email, $password, $room_id, $_POST['Student_id']);
         } else {
-            $stmt = $conn->prepare("UPDATE tb_Student SET Student_full_name=?, Email=? WHERE Student_id=?");
-            $stmt->bind_param("ssi", $name, $email, $_POST['Student_id']);
+            $stmt = $conn->prepare("UPDATE tb_Student SET Student_full_name=?, Email=?, Room_id=? WHERE Student_id=?");
+            $stmt->bind_param("ssii", $name, $email, $room_id, $_POST['Student_id']);
         }
         $stmt->execute() ? ($message = "Student updated!") && ($messageType = 'success')
             : ($message = $stmt->error) && ($messageType = 'danger');
@@ -636,7 +638,7 @@
                 <td><?php echo htmlspecialchars($s['Email'] ?? '—') ?></td>
 	            <td><?php echo htmlspecialchars($s['Room_name'] ?? '—') ?></td>
                 <td><div class="table-actions">
-                    <button class="btn-edit" onclick="openEdit('editStudentModal',{Student_id:'<?php echo $s['Student_id'] ?>',Student_full_name:'<?php echo addslashes(htmlspecialchars($s['Student_full_name'])) ?>',Student_email:'<?php echo addslashes(htmlspecialchars($s['Email'] ?? '')) ?>'})"><i class="bi bi-pencil"></i></button>
+                    <button class="btn-edit" onclick="openEdit('editStudentModal',{Student_id:'<?php echo $s['Student_id'] ?>',Student_full_name:'<?php echo addslashes(htmlspecialchars($s['Student_full_name'])) ?>',Student_email:'<?php echo addslashes(htmlspecialchars($s['Email'] ?? '')) ?>',Room_id:'<?php echo $s['Room_id'] ?? '' ?>'})"><i class="bi bi-pencil"></i></button>
                     <form method="POST" onsubmit="return confirm('Delete this student?')">
                         <input type="hidden" name="action" value="delete_student">
                         <input type="hidden" name="Student_id" value="<?php echo $s['Student_id'] ?>">
@@ -656,7 +658,11 @@
         <div class="modal-body">
             <label class="form-label">Full Name *</label><input name="Student_full_name" class="form-control mb-3" required placeholder="Enter student full name">
             <label class="form-label">Email *</label><input name="Student_email" type="email" class="form-control mb-3" required placeholder="Enter email address">
-            <label class="form-label">Password *</label><input name="Student_password" type="password" class="form-control" required placeholder="Enter password">
+            <label class="form-label">Password *</label><input name="Student_password" type="password" class="form-control mb-3" required placeholder="Enter password">
+            <label class="form-label">Room</label>
+            <select name="Room_id" class="form-select"><option value="">— None —</option>
+            <?php foreach ($rooms as $r): ?><option value="<?php echo $r['Room_id'] ?>"><?php echo htmlspecialchars($r['Room_name']) ?></option><?php endforeach; ?>
+            </select>
         </div>
         <div class="modal-footer"><button type="button" class="btn-modal-cancel" data-bs-dismiss="modal">Cancel</button><button class="btn-modal-add">Add Student</button></div>
         </form>
@@ -667,7 +673,11 @@
         <div class="modal-body">
             <label class="form-label">Full Name *</label><input name="Student_full_name" id="edit_Student_full_name" class="form-control mb-3" required>
             <label class="form-label">Email *</label><input name="Student_email" id="edit_Student_email" type="email" class="form-control mb-3" required>
-            <label class="form-label">New Password <small class="text-muted">(leave blank to keep)</small></label><input name="Student_password" type="password" class="form-control" placeholder="Enter new password">
+            <label class="form-label">New Password <small class="text-muted">(leave blank to keep)</small></label><input name="Student_password" type="password" class="form-control mb-3" placeholder="Enter new password">
+            <label class="form-label">Room</label>
+            <select name="Room_id" id="edit_Room_id" class="form-select"><option value="">— None —</option>
+            <?php foreach ($rooms as $r): ?><option value="<?php echo $r['Room_id'] ?>"><?php echo htmlspecialchars($r['Room_name']) ?></option><?php endforeach; ?>
+            </select>
         </div>
         <div class="modal-footer"><button type="button" class="btn-modal-cancel" data-bs-dismiss="modal">Cancel</button><button class="btn-modal-add">Update Student</button></div>
         </form>

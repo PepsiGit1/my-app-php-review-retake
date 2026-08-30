@@ -100,23 +100,72 @@
     $l_type_id   = intval($_POST['l_type_id']);
     $file_path   = "";
 
-    if (isset($_FILES['lesson_pdf']) && $_FILES['lesson_pdf']['error'] === UPLOAD_ERR_OK) {
-        $upload_dir = __DIR__ . "/uploads/lessons/";
-        if (! is_dir($upload_dir)) {mkdir($upload_dir, 0777, true);}
-        if (! is_writable($upload_dir)) {
-            $error_msg = "ໄດເລກທໍລີອັບໂຫຼດບໍ່ສາມາດຂຽນໄດ້.";
+    if (
+        isset($_FILES['lesson_pdf']) &&
+        $_FILES['lesson_pdf']['error'] !== UPLOAD_ERR_NO_FILE
+    ) {
+
+        if ($_FILES['lesson_pdf']['error'] !== UPLOAD_ERR_OK) {
+
+            $error_msg = "ການອັບໂຫຼດ PDF ລົ້ມເຫຼວ.";
+
         } else {
-            $file_ext = strtolower(pathinfo($_FILES['lesson_pdf']['name'], PATHINFO_EXTENSION));
-            $finfo    = finfo_open(FILEINFO_MIME_TYPE);
-            $mime     = finfo_file($finfo, $_FILES['lesson_pdf']['tmp_name']);
+
+            $upload_dir = __DIR__ . "/uploads/lessons/";
+
+            if (! is_dir($upload_dir)) {
+                mkdir($upload_dir, 0775, true);
+            }
+
+            $file_ext = strtolower(
+                pathinfo(
+                    $_FILES['lesson_pdf']['name'],
+                    PATHINFO_EXTENSION
+                )
+            );
+
+            $finfo = finfo_open(FILEINFO_MIME_TYPE);
+
+            $mime = finfo_file(
+                $finfo,
+                $_FILES['lesson_pdf']['tmp_name']
+            );
+
             finfo_close($finfo);
-            if ($file_ext === "pdf" && $mime === "application/pdf") {
-                $new_filename = substr(md5(uniqid()), 0, 12) . ".pdf";
-                $target_path  = $upload_dir . $new_filename;
-                if (move_uploaded_file($_FILES['lesson_pdf']['tmp_name'], $target_path)) {
-                    $file_path = "uploads/lessons/" . $new_filename;
-                } else { $error_msg = "ການຍ້າຍໄຟລ໌ທີ່ອັບໂຫຼດລົ້ມເຫລວ.";}
-            } else { $error_msg = "ອະນຸຍາດໃຫ້ເທົ່ານັ້ນໄຟລ໌ PDF.";}
+
+            if (
+                $file_ext === "pdf" &&
+                $mime === "application/pdf"
+            ) {
+
+                $new_filename =
+                    substr(md5(uniqid('', true)), 0, 12)
+                    . ".pdf";
+
+                $target_path =
+                    $upload_dir . $new_filename;
+
+                if (
+                    move_uploaded_file(
+                        $_FILES['lesson_pdf']['tmp_name'],
+                        $target_path
+                    )
+                ) {
+
+                    $file_path =
+                        "uploads/lessons/" . $new_filename;
+
+                } else {
+
+                    $error_msg =
+                        "ການຍ້າຍໄຟລ໌ທີ່ອັບໂຫຼດລົ້ມເຫຼວ.";
+                }
+
+            } else {
+
+                $error_msg =
+                    "ອະນຸຍາດໃຫ້ເທົ່ານັ້ນໄຟລ໌ PDF.";
+            }
         }
     }
 
@@ -148,21 +197,85 @@
     $old_path    = trim($_POST['old_file_path']);
     $file_path   = $old_path;
 
-    if (isset($_FILES['lesson_pdf']) && $_FILES['lesson_pdf']['error'] === UPLOAD_ERR_OK) {
-        $upload_dir = __DIR__ . "/uploads/lessons/";
-        if (! is_dir($upload_dir)) {mkdir($upload_dir, 0777, true);}
-        $file_ext = strtolower(pathinfo($_FILES['lesson_pdf']['name'], PATHINFO_EXTENSION));
-        $finfo    = finfo_open(FILEINFO_MIME_TYPE);
-        $mime     = finfo_file($finfo, $_FILES['lesson_pdf']['tmp_name']);
-        finfo_close($finfo);
-        if ($file_ext === "pdf" && $mime === "application/pdf") {
-            $new_filename = substr(md5(uniqid()), 0, 12) . ".pdf";
-            $target_path  = $upload_dir . $new_filename;
-            if (move_uploaded_file($_FILES['lesson_pdf']['tmp_name'], $target_path)) {
-                if ($old_path && file_exists(__DIR__ . "/" . $old_path)) {unlink(__DIR__ . "/" . $old_path);}
-                $file_path = "uploads/lessons/" . $new_filename;
-            } else { $error_msg = "ການຍ້າຍໄຟລ໌ທີ່ອັບໂຫຼດລົ້ມເຫລວ.";}
-        } else { $error_msg = "ອະນຸຍາດໃຫ້ເທົ່ານັ້ນໄຟລ໌ PDF.";}
+    // Keep old PDF by default
+    $file_path = $old_path;
+
+    if (
+        isset($_FILES['lesson_pdf']) &&
+        $_FILES['lesson_pdf']['error'] !== UPLOAD_ERR_NO_FILE
+    ) {
+
+        if ($_FILES['lesson_pdf']['error'] !== UPLOAD_ERR_OK) {
+
+            $error_msg = "ການອັບໂຫຼດ PDF ລົ້ມເຫຼວ.";
+
+        } else {
+
+            $upload_dir = __DIR__ . "/uploads/lessons/";
+
+            if (! is_dir($upload_dir)) {
+                mkdir($upload_dir, 0775, true);
+            }
+
+            $file_ext = strtolower(
+                pathinfo(
+                    $_FILES['lesson_pdf']['name'],
+                    PATHINFO_EXTENSION
+                )
+            );
+
+            $finfo = finfo_open(FILEINFO_MIME_TYPE);
+
+            $mime = finfo_file(
+                $finfo,
+                $_FILES['lesson_pdf']['tmp_name']
+            );
+
+            finfo_close($finfo);
+
+            if (
+                $file_ext === "pdf" &&
+                $mime === "application/pdf"
+            ) {
+
+                $new_filename =
+                    substr(md5(uniqid('', true)), 0, 12)
+                    . ".pdf";
+
+                $target_path =
+                    $upload_dir . $new_filename;
+
+                if (
+                    move_uploaded_file(
+                        $_FILES['lesson_pdf']['tmp_name'],
+                        $target_path
+                    )
+                ) {
+
+                    // Delete old PDF
+                    if (
+                        ! empty($old_path) &&
+                        file_exists(__DIR__ . "/" . $old_path)
+                    ) {
+                        unlink(__DIR__ . "/" . $old_path);
+                    }
+
+                    // Save new path
+                    $file_path =
+                        "uploads/lessons/" . $new_filename;
+
+                } else {
+
+                    $error_msg =
+                        "ການຍ້າຍໄຟລ໌ທີ່ອັບໂຫຼດລົ້ມເຫຼວ.";
+                }
+
+            } else {
+
+                $error_msg =
+                    "ອະນຸຍາດໃຫ້ເທົ່ານັ້ນໄຟລ໌ PDF.";
+            }
+        }
     }
 
     if ($error_msg === "" && $lesson_name !== "") {
@@ -232,25 +345,143 @@
     $start_at  = ! empty($_POST['start_at']) ? $_POST['start_at'] : null;
     $end_at    = ! empty($_POST['end_at']) ? $_POST['end_at'] : null;
     $file_path = "";
+    if (isset($_FILES['exam_pdf'])) {
 
-    if (isset($_FILES['exam_pdf']) && $_FILES['exam_pdf']['error'] === UPLOAD_ERR_OK) {
-        $upload_dir = __DIR__ . "/uploads/exams/";
-        if (! is_dir($upload_dir)) {mkdir($upload_dir, 0777, true);}
-        if (! is_writable($upload_dir)) {
-            $error_msg = "ໄດເລກທໍລີອັບໂຫຼດບໍ່ສາມາດຂຽນໄດ້.";
+        echo "<pre>";
+        print_r($_FILES['exam_pdf']);
+        echo "</pre>";
+
+        echo "File exists: YES<br>";
+        echo "Upload error code: " . $_FILES['exam_pdf']['error'] . "<br>";
+
+        if ($_FILES['exam_pdf']['error'] === UPLOAD_ERR_OK) {
+
+            $upload_dir = __DIR__ . "/uploads/exams/";
+
+            echo "Upload directory: " . $upload_dir . "<br>";
+
+            if (! is_dir($upload_dir)) {
+
+                echo "Directory does not exist. Creating...<br>";
+
+                if (mkdir($upload_dir, 0777, true)) {
+                    echo "Directory created successfully.<br>";
+                } else {
+                    echo "ERROR: Cannot create directory.<br>";
+                }
+            }
+
+            echo "Directory exists: ";
+            var_dump(is_dir($upload_dir));
+
+            echo "<br>Directory writable: ";
+            var_dump(is_writable($upload_dir));
+
+            if (! is_writable($upload_dir)) {
+
+                echo "<br>ERROR: Directory is not writable.<br>";
+
+            } else {
+
+                $file_ext = strtolower(
+                    pathinfo(
+                        $_FILES['exam_pdf']['name'],
+                        PATHINFO_EXTENSION
+                    )
+                );
+
+                echo "<br>File name: "
+                    . $_FILES['exam_pdf']['name'];
+
+                echo "<br>File extension: "
+                    . $file_ext;
+
+                echo "<br>Temporary file: "
+                    . $_FILES['exam_pdf']['tmp_name'];
+
+                echo "<br>File size: "
+                    . $_FILES['exam_pdf']['size']
+                    . " bytes<br>";
+
+                $finfo = finfo_open(FILEINFO_MIME_TYPE);
+
+                $mime = finfo_file(
+                    $finfo,
+                    $_FILES['exam_pdf']['tmp_name']
+                );
+
+                finfo_close($finfo);
+
+                echo "MIME type: " . $mime . "<br>";
+
+                if (
+                    $file_ext === "pdf" &&
+                    $mime === "application/pdf"
+                ) {
+
+                    echo "PDF validation: OK<br>";
+
+                    $new_filename =
+                        substr(md5(uniqid()), 0, 12)
+                        . ".pdf";
+
+                    echo "New filename: "
+                        . $new_filename
+                        . "<br>";
+
+                    $target_path =
+                        $upload_dir . $new_filename;
+
+                    echo "Target path: "
+                        . $target_path
+                        . "<br>";
+
+                    echo "Trying to move file...<br>";
+
+                    if (
+                        move_uploaded_file(
+                            $_FILES['exam_pdf']['tmp_name'],
+                            $target_path
+                        )
+                    ) {
+
+                        echo "<strong>UPLOAD SUCCESS!</strong><br>";
+
+                        $file_path =
+                            "uploads/exams/" . $new_filename;
+
+                        echo "Database path: "
+                            . $file_path;
+
+                    } else {
+
+                        echo "<strong>UPLOAD FAILED!</strong><br>";
+
+                        $last_error = error_get_last();
+
+                        echo "PHP error:<br>";
+                        echo "<pre>";
+                        print_r($last_error);
+                        echo "</pre>";
+                    }
+
+                } else {
+
+                    echo "ERROR: Not a valid PDF.<br>";
+                    echo "Extension: " . $file_ext . "<br>";
+                    echo "MIME: " . $mime . "<br>";
+                }
+            }
+
         } else {
-            $file_ext = strtolower(pathinfo($_FILES['exam_pdf']['name'], PATHINFO_EXTENSION));
-            $finfo    = finfo_open(FILEINFO_MIME_TYPE);
-            $mime     = finfo_file($finfo, $_FILES['exam_pdf']['tmp_name']);
-            finfo_close($finfo);
-            if ($file_ext === "pdf" && $mime === "application/pdf") {
-                $new_filename = substr(md5(uniqid()), 0, 12) . ".pdf";
-                $target_path  = $upload_dir . $new_filename;
-                if (move_uploaded_file($_FILES['exam_pdf']['tmp_name'], $target_path)) {
-                    $file_path = "uploads/exams/" . $new_filename;
-                } else { $error_msg = "ການຍ້າຍໄຟລ໌ທີ່ອັບໂຫຼດລົ້ມເຫລວ.";}
-            } else { $error_msg = "ອະນຸຍາດໃຫ້ເທົ່ານັ້ນໄຟລ໌ PDF.";}
+
+            echo "UPLOAD ERROR CODE: "
+                . $_FILES['exam_pdf']['error'];
         }
+
+    } else {
+
+        echo "ERROR: exam_pdf was not received.";
     }
 
     if ($error_msg === "" && $exam_name !== "") {
@@ -284,23 +515,103 @@
     $old_path  = trim($_POST['old_file_path']);
     $file_path = $old_path;
 
-    if (isset($_FILES['exam_pdf']) && $_FILES['exam_pdf']['error'] === UPLOAD_ERR_OK) {
-        $upload_dir = __DIR__ . "/uploads/exams/";
-        if (! is_dir($upload_dir)) {mkdir($upload_dir, 0777, true);}
-        $file_ext = strtolower(pathinfo($_FILES['exam_pdf']['name'], PATHINFO_EXTENSION));
-        $finfo    = finfo_open(FILEINFO_MIME_TYPE);
-        $mime     = finfo_file($finfo, $_FILES['exam_pdf']['tmp_name']);
-        finfo_close($finfo);
-        if ($file_ext === "pdf" && $mime === "application/pdf") {
-            $new_filename = substr(md5(uniqid()), 0, 12) . ".pdf";
-            $target_path  = $upload_dir . $new_filename;
-            if (move_uploaded_file($_FILES['exam_pdf']['tmp_name'], $target_path)) {
-                if ($old_path && file_exists(__DIR__ . "/" . $old_path)) {unlink(__DIR__ . "/" . $old_path);}
-                $file_path = "uploads/exams/" . $new_filename;
-            } else { $error_msg = "ການຍ້າຍໄຟລ໌ທີ່ອັບໂຫຼດລົ້ມເຫລວ.";}
-        } else { $error_msg = "ອະນຸຍາດໃຫ້ເທົ່ານັ້ນໄຟລ໌ PDF.";}
-    }
+    if (
+        isset($_FILES['exam_pdf']) &&
+        $_FILES['exam_pdf']['error'] !== UPLOAD_ERR_NO_FILE
+    ) {
 
+        if ($_FILES['exam_pdf']['error'] === UPLOAD_ERR_OK) {
+
+            $upload_dir = __DIR__ . "/uploads/exams/";
+
+            // Create upload directory if it doesn't exist
+            if (! is_dir($upload_dir)) {
+                mkdir($upload_dir, 0777, true);
+            }
+
+            // Check writable
+            if (! is_writable($upload_dir)) {
+                echo "<pre>";
+                echo "Upload directory: " . $upload_dir . PHP_EOL;
+                echo "Exists: ";
+                var_dump(is_dir($upload_dir));
+                echo "Writable: ";
+                var_dump(is_writable($upload_dir));
+                echo "</pre>";
+                $error_msg = "❌ ບໍ່ສາມາດຂຽນໄຟລ໌ໃນ folder uploads/exams/ ໄດ້.";
+            } else {
+
+                $file_ext = strtolower(
+                    pathinfo(
+                        $_FILES['exam_pdf']['name'],
+                        PATHINFO_EXTENSION
+                    )
+                );
+
+                // Check MIME
+                $finfo = finfo_open(FILEINFO_MIME_TYPE);
+
+                $mime = finfo_file(
+                    $finfo,
+                    $_FILES['exam_pdf']['tmp_name']
+                );
+
+                finfo_close($finfo);
+
+                // Validate PDF
+                if (
+                    $file_ext === "pdf" &&
+                    $mime === "application/pdf"
+                ) {
+
+                    // Generate new filename
+                    $new_filename =
+                        substr(md5(uniqid('', true)), 0, 12)
+                        . ".pdf";
+
+                    $target_path =
+                        $upload_dir . $new_filename;
+
+                    // Move uploaded file
+                    if (
+                        move_uploaded_file(
+                            $_FILES['exam_pdf']['tmp_name'],
+                            $target_path
+                        )
+                    ) {
+
+                        // Delete old PDF
+                        if (
+                            ! empty($old_path) &&
+                            file_exists(__DIR__ . "/" . $old_path)
+                        ) {
+                            unlink(__DIR__ . "/" . $old_path);
+                        }
+
+                        // New database path
+                        $file_path =
+                            "uploads/exams/" . $new_filename;
+
+                    } else {
+
+                        $error_msg =
+                            "ການຍ້າຍໄຟລ໌ທີ່ອັບໂຫຼດລົ້ມເຫລວ.";
+                    }
+
+                } else {
+
+                    $error_msg =
+                        "ອະນຸຍາດໃຫ້ເທົ່ານັ້ນໄຟລ໌ PDF.";
+                }
+            }
+
+        } else {
+
+            $error_msg =
+                "ການອັບໂຫຼດໄຟລ໌ລົ້ມເຫລວ. Error code: "
+                . $_FILES['exam_pdf']['error'];
+        }
+    }
     if ($error_msg === "" && $exam_name !== "") {
         $stmt = $conn->prepare("UPDATE tb_Exam SET Exam_name=?, File_Path=?, Lesson_id=?, E_Type_id=?, start_at=?, end_at=? WHERE Exam_id=?");
         if (! $stmt) {die("ການກຽມລົ້ມເຫລວ: " . $conn->error);}
@@ -567,6 +878,30 @@
     }
     }
 
+    // ===== Fetch Room Name =====
+    $room_name = '';
+    $r_stmt    = $conn->prepare("SELECT Room_name FROM tb_Room WHERE Room_id = ? LIMIT 1");
+    if ($r_stmt) {
+    $r_stmt->bind_param("i", $class_id);
+    $r_stmt->execute();
+    $r_stmt->bind_result($room_name);
+    $r_stmt->fetch();
+    $r_stmt->close();
+    }
+
+    // ===== Fetch All Students In This Room (regardless of enrollment/exam) =====
+    $room_students = [];
+    if ($is_teacher) {
+    $rs_stmt = $conn->prepare("SELECT Student_id, Student_full_name FROM tb_Student WHERE Room_id = ?");
+    if ($rs_stmt) {
+        $rs_stmt->bind_param("i", $class_id);
+        $rs_stmt->execute();
+        $rs_result = $rs_stmt->get_result();
+        while ($row = $rs_result->fetch_assoc()) {$room_students[] = $row;}
+        $rs_stmt->close();
+    }
+    }
+
     // ===== Fetch Lesson Types =====
     $lesson_types = [];
     $res_lt       = $conn->query("SELECT L_Type_id, L_Type_name FROM tb_Lesson_Type");
@@ -664,6 +999,30 @@
         $sub_res = $sub_stmt->get_result();
         while ($row = $sub_res->fetch_assoc()) {$submissions[] = $row;}
         $sub_stmt->close();
+    }
+    }
+    // ===== Handle Delete All Submissions For a Student (Teacher Only) =====
+    if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['delete_student_submissions']) && $is_teacher) {
+    $del_student_id = intval($_POST['student_id']);
+
+    $stmt = $conn->prepare("
+        DELETE es FROM tb_Exam_Submit es
+        JOIN tb_Exam e ON es.Exam_id = e.Exam_id
+        WHERE es.Student_id = ? AND e.Room_id = ?
+    ");
+    if (! $stmt) {die("ການກຽມລົ້ມເຫລວ: " . $conn->error);}
+    $stmt->bind_param("ii", $del_student_id, $class_id);
+    if ($stmt->execute()) {
+        $stmt->close();
+        $conn->close();
+        header("Location: home.php?class_id=$class_id&success=submissions_deleted&tab=report");
+        exit();
+    } else {
+        $err = $stmt->error;
+        $stmt->close();
+        $conn->close();
+        header("Location: home.php?class_id=$class_id&error=" . urlencode($err) . "&tab=report");
+        exit();
     }
     }
 
@@ -767,6 +1126,46 @@
         if ($b['average_score'] === null) {return -1;}
         return $b['average_score'] <=> $a['average_score'];
     });
+    }
+
+    $report_total_enrolled      = 0;
+    $report_total_submitted     = 0;
+    $report_total_not_submitted = 0;
+    $full_student_report        = [];
+    if ($is_teacher) {
+    $enrolled_student_ids       = array_unique(array_column($all_enrollments, 'Student_id'));
+    $submitted_student_ids      = array_column($report_rows, 'Student_id');
+    $report_total_enrolled      = count($enrolled_student_ids);
+    $report_total_submitted     = count($report_rows);
+    $report_total_not_submitted = count(array_diff($enrolled_student_ids, $submitted_student_ids));
+
+    $enroll_counts = [];
+    foreach ($all_enrollments as $en) {
+        $sid = $en['Student_id'];
+        if (! isset($enroll_counts[$sid])) {
+            $enroll_counts[$sid] = ['enroll_count' => 0, 'approved_count' => 0];
+        }
+        $enroll_counts[$sid]['enroll_count']++;
+        if (isset($en['approve']) && $en['approve'] == 1) {$enroll_counts[$sid]['approved_count']++;}
+    }
+    $report_by_student = [];
+    foreach ($report_rows as $r) {$report_by_student[$r['Student_id']] = $r;}
+
+    foreach ($room_students as $stu) {
+        $sid                   = $stu['Student_id'];
+        $ec                    = $enroll_counts[$sid] ?? ['enroll_count' => 0, 'approved_count' => 0];
+        $rr                    = $report_by_student[$sid] ?? null;
+        $full_student_report[] = [
+            'Student_id'        => $sid,
+            'Student_full_name' => $stu['Student_full_name'],
+            'enroll_count'      => $ec['enroll_count'],
+            'approved_count'    => $ec['approved_count'],
+            'exam_count'        => $rr['exam_count'] ?? 0,
+            'graded_count'      => $rr['graded_count'] ?? 0,
+            'average_score'     => $rr['average_score'] ?? null,
+        ];
+    }
+    usort($full_student_report, fn($a, $b) => strcmp($a['Student_full_name'], $b['Student_full_name']));
     }
 
     $my_report = ['exam_count' => 0, 'graded_count' => 0, 'average_score' => null];
@@ -1561,16 +1960,23 @@
     <div id="report" class="tab-panel">
         <?php if ($is_teacher): ?>
             <div class="section-header"><h3>📈 ລາຍງານຄະແນນສອບເສັງນັກຮຽນ</h3></div>
+            <div class="info-row">
+                <div class="info-box"><span>📋 ນັກຮຽນລົງທະບຽນທັງໝົດ</span><strong><?php echo $report_total_enrolled; ?></strong></div>
+                <div class="info-box"><span>📤 ສົ່ງສອບເສັງແລ້ວ</span><strong><?php echo $report_total_submitted; ?></strong></div>
+                <div class="info-box"><span>❌ ຍັງບໍ່ໄດ້ສົ່ງ</span><strong><?php echo $report_total_not_submitted; ?></strong></div>
+            </div>
             <div style="overflow-x:auto;margin-top:10px;">
                 <table class="submit-table">
                     <thead>
                         <tr>
                             <th>#</th>
                             <th>ນັກຮຽນ</th>
-                            <th>ຈຳນວນວິຊາຮຽນ</th>
-                            <th>ກວດແລ້ວ</th>
+                            <th>ຊື່ຫ້ອງຮຽນ</th>
+                            <th>ຈຳນວນສົ່ງ</th>
+                            <th>ຕັດເກຣດແລ້ວ</th>
                             <th>ຄະແນນສະເລ່ຍ</th>
                             <th>ລາຍລະອຽດການສອບເສັງ</th>
+                            <th>ຈັດການ</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -1579,6 +1985,7 @@
                                 <tr>
                                     <td style="color:#999;font-weight:600;"><?php echo $i + 1; ?></td>
                                     <td>👤 <?php echo htmlspecialchars($r['Student_full_name']); ?></td>
+                                    <td>🏫 <?php echo htmlspecialchars($room_name ?: '-'); ?></td>
                                     <td><?php echo $r['exam_count']; ?></td>
                                     <td><?php echo $r['graded_count']; ?></td>
                                     <td style="font-weight:700;color:#1a73e8;">
@@ -1591,10 +1998,66 @@
                                             </span>
                                         <?php endforeach; ?>
                                     </td>
+                                  <td>
+                                    <button class="btn-delete" onclick="confirmDeleteReportRow(<?php echo $r['Student_id']; ?>, '<?php echo addslashes($r['Student_full_name']); ?>')">🗑️ ລຶບ</button>
+                                </td>
                                 </tr>
                             <?php endforeach; ?>
                         <?php else: ?>
-                            <tr><td colspan="6" style="text-align:center;color:#aaa;padding:30px;">ຍັງບໍ່ມີຂໍ້ມູນລາຍງານ.</td></tr>
+                            <tr><td colspan="7" style="text-align:center;color:#aaa;padding:30px;">ຍັງບໍ່ມີຂໍ້ມູນລາຍງານ.</td></tr>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+            <!-- CONFIRM DELETE REPORT ROW (Student Submissions) -->
+            <div class="confirm-overlay" id="confirmReportOverlay">
+                <div class="confirm-box">
+                    <h4>🗑️ ຢືນຢັນການລຶບ</h4>
+                    <p>ທ່ານແນ່ໃຈບໍ່ວ່າຕ້ອງການລຶບການສົ່ງທັງໝົດຂອງ <strong id="confirmReportName"></strong>?<br>ການດຳເນີນການນີ້ບໍ່ສາມາດຍ້ອນກັບໄດ້.</p>
+                    <form method="POST" action="home.php?class_id=<?php echo $class_id; ?>">
+                        <input type="hidden" name="student_id" id="delete_report_student_id">
+                        <div class="confirm-actions">
+                            <button type="button" class="btn-cancel" onclick="closeConfirmReport()">ຍົກເລີກ</button>
+                            <button type="submit" name="delete_student_submissions" class="btn-delete">🗑️ ລຶບ</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- ===== ALL STUDENTS IN CLASS REPORT ===== -->
+            <div class="section-header" style="margin-top:36px;">
+                <h3>📋 ລາຍງານນັກຮຽນທັງໝົດໃນຫ້ອງ</h3>
+            </div>
+            <div style="overflow-x:auto;margin-top:10px;">
+                <table class="submit-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>ນັກຮຽນ</th>
+                            <th>ຊື່ຫ້ອງຮຽນ</th>
+                            <th>ອະນຸມັດແລ້ວ</th>
+                            <th>ສົ່ງສອບເສັງ</th>
+                            <th>ຕັດເກຣດແລ້ວ</th>
+                            <th>ຄະແນນສະເລ່ຍ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if (! empty($full_student_report)): ?>
+                            <?php foreach ($full_student_report as $i => $fr): ?>
+                                <tr>
+                                    <td style="color:#999;font-weight:600;"><?php echo $i + 1; ?></td>
+                                    <td>👤 <?php echo htmlspecialchars($fr['Student_full_name']); ?></td>
+                                    <td>🏫 <?php echo htmlspecialchars($room_name ?: '-'); ?></td>
+                                    <td><?php echo $fr['approved_count']; ?></td>
+                                    <td><?php echo $fr['exam_count']; ?></td>
+                                    <td><?php echo $fr['graded_count']; ?></td>
+                                    <td style="font-weight:700;color:#1a73e8;">
+                                        <?php echo $fr['average_score'] !== null ? number_format($fr['average_score'], 1) : '—'; ?>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <tr><td colspan="8" style="text-align:center;color:#aaa;padding:30px;">ຍັງບໍ່ມີນັກຮຽນລົງທະບຽນ.</td></tr>
                         <?php endif; ?>
                     </tbody>
                 </table>
@@ -1605,11 +2068,12 @@
                 <div class="info-box"><span>📤 ສົ່ງແລ້ວ</span><strong><?php echo $my_report['exam_count']; ?></strong></div>
                 <div class="info-box"><span>✅ ຕັດເກຣດແລ້ວ</span><strong><?php echo $my_report['graded_count']; ?></strong></div>
                 <div class="info-box"><span>🏆 ຄະແນນສະເລ່ຍ</span><strong><?php echo $my_report['average_score'] !== null ? number_format($my_report['average_score'], 1) : '—'; ?></strong></div>
+                <div class="info-box"><span>🏫 ຫ້ອງ</span><strong><?php echo htmlspecialchars($room_name ?: '-'); ?></strong></div>
             </div>
             <div style="overflow-x:auto;margin-top:10px;">
                 <table class="submit-table">
                     <thead>
-                        <tr><th>#</th><th>ການສອບເສັງ</th><th>ສະຖານະ</th><th>ຄະແນນ</th><th>ວັນທີ</th></tr>
+                        <tr><th>#</th><th>ການສອບເສັງ</th><th>ຫ້ອງ</th><th>ສະຖານະ</th><th>ຄະແນນ</th><th>ວັນທີ</th></tr>
                     </thead>
                     <tbody>
                         <?php if (! empty($submissions)): ?>
@@ -1617,6 +2081,7 @@
                                 <tr>
                                     <td style="color:#999;font-weight:600;"><?php echo $i + 1; ?></td>
                                     <td>📝 <?php echo htmlspecialchars($sub['Exam_name']); ?></td>
+                                    <td>🏫 <?php echo htmlspecialchars($room_name ?: '-'); ?></td>
                                     <td>
                                         <span class="<?php echo $sub['Submit_Status'] === 'Graded' ? 'badge-graded' : 'badge-submitted'; ?>">
                                             <?php echo $sub['Submit_Status'] === 'Graded' ? '✅' : '⏳'; ?> <?php echo htmlspecialchars($sub['Submit_Status']); ?>
@@ -1627,7 +2092,7 @@
                                 </tr>
                             <?php endforeach; ?>
                         <?php else: ?>
-                            <tr><td colspan="5" style="text-align:center;color:#aaa;padding:30px;">ຍັງບໍ່ມີການສົ່ງ.</td></tr>
+                            <tr><td colspan="6" style="text-align:center;color:#aaa;padding:30px;">ຍັງບໍ່ມີການສົ່ງ.</td></tr>
                         <?php endif; ?>
                     </tbody>
                 </table>
@@ -1966,6 +2431,14 @@
 <?php endif; ?>
 
 <script>
+    function confirmDeleteReportRow(studentId, studentName) {
+    document.getElementById('delete_report_student_id').value = studentId;
+    document.getElementById('confirmReportName').textContent = studentName;
+    document.getElementById('confirmReportOverlay').classList.add('open');
+}
+function closeConfirmReport() {
+    document.getElementById('confirmReportOverlay').classList.remove('open');
+}
     function showTab(tabId, btn) {
         document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -2100,6 +2573,7 @@
     <?php if ($is_student && isset($_GET['tab']) && $_GET['tab'] === 'submit_exam' && isset($_GET['error'])): ?>
         openModal('submitExamModal');
     <?php endif; ?>
+
 </script>
 </body>
 </html>
